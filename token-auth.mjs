@@ -5,13 +5,16 @@ import {createHash} from "node:crypto";
 // creating a key pair
 const pair = await createKeyPair();
 
-// creating a signed auth op
+// creating an authority as of token-auth described here https://github.com/BennyTheDev/tap-protocol-specs.
 //
-// auth ops must be inscribed and tapped by the authority that wants to connect
-// the specified tickers. after tapping, the specified tickers are associated with the account that tapped it.
+// auth ops must be inscribed and tapped (inscribe + sent to yourself) by the authority that wants to allow
+// the use of specified tickers being handled by the authority (or empty message array for any token that the authority controls).
+// after tapping, the specified tickers are associated with the account that tapped it.
 //
 // each hash must be unique. therefore the authority must provide a salt to make sure the resulting hash is unique.
-const authResult = await createAuth(
+// if your authority needs the capability to re-index and filter already signed auth creation ops,
+// then the salt should be something unique like an inscription id that it refers to.
+const authResult = await generate(
     pair.pk,
     pair.pub,
     'auth',
@@ -20,13 +23,17 @@ const authResult = await createAuth(
 )
 
 // creates a signed redeem op.
+// it returns an object from which the "result" attribute will be used to inscribe.
+// the result can be broadcasted by the authority through channels of their choice (e.g. on websites, emails, etc)
 //
 // redeem ops should be issued by the authority that inscribed the corresponding auth op like above.
 // anyone receiving a redeem op can inscribe it but it can only be used once and will be only credited
-// to the signed recipients as of "items".
+// to the signed recipients as of "items" array in the message.
 //
 // each hash must be unique. therefore the authority must provide a salt to make sure the resulting hash is unique.
-const redeemResult = await createAuth(
+// if your authority needs the capability to re-index and filter already signed redeem ops,
+// then the salt should be something unique like an inscription id that it refers to.
+const redeemResult = await generate(
     pair.pk,
     pair.pub,
     'redeem',
@@ -44,6 +51,9 @@ const redeemResult = await createAuth(
     Math.random()
 )
 
+// creating a random pair for demonstration.
+// in a production environment, the authority stores its private key at a safe place and signs
+// the messages on demand.
 console.log('####### RANDOM PAIR ########');
 console.log(pair);
 
@@ -83,7 +93,7 @@ async function createKeyPair() {
  * @param salt
  * @returns {Promise<{result: string, test: {valid: boolean, pubRecovered: string, pub: string}}>}
  */
-async function createAuth(privKey, pubKey, messageKey, message, salt) {
+async function generate(privKey, pubKey, messageKey, message, salt) {
 
     privKey = Buffer.from(privKey, 'hex');
     pubKey = Buffer.from(pubKey, 'hex');
