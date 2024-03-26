@@ -22,7 +22,7 @@ Clone this repository in order to run:
 
 ```
 git clone https://github.com/Trac-Systems/tap-protocol-token-auth-boilerplate.git
-cd tap-protocol-airdrop-boilerplate
+cd tap-protocol-token-auth-boilerplate
 npm i
 node token-auth.mjs
 ```
