@@ -122,7 +122,8 @@ async function generate(privKey, pubKey, messageKey, message, salt) {
         test : {
             valid : isValid,
             pub : Buffer.from(pubKey).toString('hex'),
-            pubRecovered : test.recoverPublicKey(msgHash).toHex()
+            pubRecovered : test.recoverPublicKey(msgHash).toHex(),
+            compact_signature : test.toCompactHex().toLowerCase()
         },
         result : JSON.stringify(proto)
     }
